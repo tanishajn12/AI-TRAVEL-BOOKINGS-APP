@@ -1,5 +1,6 @@
 import { useState } from 'react'
-
+import Hero from './components/custom/Hero'
+import Header from './components/custom/Header'
 import './App.css'
 import { Button } from './components/ui/button'
 
@@ -8,8 +9,10 @@ function App() {
 
   return (
     <>
-      <h2>welcome to travel ai</h2>
-      <Button>Subscribe</Button>
+      {/* Hero */}
+      <Header/>
+      <Hero/>
+      
     </>
   )
 }
