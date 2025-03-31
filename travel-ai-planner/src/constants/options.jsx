@@ -66,3 +66,6 @@ export const TripTypeOptions = [
     { title: 'Road Trip', desc: 'Drive through scenic routes, stopping at iconic spots along the way.' },
 ];
   
+
+
+export const AI_PROMPT = `Generate a travel plan for Location: {location} for {totalDays} days for {traveler} with a {budget} budget, prioritizing {tripTypes} experiences while also including top attractions, activities, and dining options.Provide a list of hotel options with details including the hotel name, address, price per night, geo-coordinates (latitude and longitude), rating, and description. Create a detailed itinerary for each day, specifying the place name, place details, place image URL, geo-coordinates, best time to visit within the day, ticket pricing if applicable, and travel time needed between locations. Suggest restaurant options along with the restaurant name, address, price per person and description. Additionally, provide the best months or seasons to visit {location}. Return the response in JSON format.`;
