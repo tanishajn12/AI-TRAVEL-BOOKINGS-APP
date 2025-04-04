@@ -5,11 +5,24 @@ import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
 import { AI_PROMPT, SelectBudgetOptions, SelectTravelersList, TripTypeOptions } from '@/constants/options';
 import { toast } from 'sonner';
 import { chatSession } from '@/service/AIModal';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { FcGoogle } from "react-icons/fc";
+import { useGoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 
 function GenerateItinerary() {
   const [place, setPlace] = useState();
   const [selectedTripTypes, setSelectedTripTypes] = useState([]);
+
   const [formData, setFormData] = useState({});
+  const [openDialog, setOpenDialog] = useState(false);
 
   const handleInputChange=(name, value)=>{
     setFormData({
@@ -33,7 +46,26 @@ function GenerateItinerary() {
     handleInputChange('tripTypes', updatedTripTypes); // Update formData
   };
 
+  // const login = useGoogleLogin({
+  //   onSuccess:(codeResp)=>GetUserProfile(codeResp),
+  //   onError:(error)=>console.log(error)
+  // })
+  const login = useGoogleLogin({
+    onSuccess: (codeResp) => {
+        console.log("Google Login Successful:", codeResp);
+        GetUserProfile(codeResp);
+    },
+    onError: (error) => console.log("Google Login Error:", error),
+    flow: "implicit",  // Ensure correct OAuth flow
+  });
+
+
   const OnGenerateTrip=async()=>{
+    const user = localStorage.getItem('user');
+    if(!user) {
+      setOpenDialog(true);
+      return;
+    }
     if(formData?.noOfDays>5 && !formData?.location && !formData?.location || !formData?.budget || !formData?.traveler) {
       
       toast("Please fill all details");
@@ -53,6 +85,18 @@ function GenerateItinerary() {
     console.log(result?.response?.text());
   }
 
+  const GetUserProfile =(tokenInfo) => {
+    
+      axios.get(`https://www.googleapis.com/oauth/v1/userinfo?access_token=${tokenInfo?.access_token}`, {
+        headers: {
+          Authorization: `Bearer ${tokenInfo?.access_token}`,
+          Accept: 'Application/json'
+        }
+      }).then((resp)=>{
+        console.log(resp);
+      })
+    
+  };
   
 
   return (
@@ -116,7 +160,7 @@ function GenerateItinerary() {
                 rounded-lg hover:shadow-lg
                 ${formData?.traveler == item.title && 'border-black shadow-lg'}
                 `}>
-                <h2 className="text-2xl">{item.icon}</h2>
+                {/* <h2 className="text-2xl">{item.icon}</h2> */}
                 <h2 className="text-lg my-3 font-bold">{item.title}</h2>
                 <h2 className="text-sm text-gray-700">{item.desc}</h2>
               </div>
@@ -148,6 +192,36 @@ function GenerateItinerary() {
         <Button onClick={OnGenerateTrip}>Generate Trip</Button>
 
       </div>
+      <Dialog open={openDialog}>
+        
+      <DialogContent className="flex items-center justify-between p-6">
+        {/* Left side - Image */}
+        <div className="w-1/2">
+          <img
+            src="src\assets\Travelers-rafiki.svg"
+            alt="Sign In"
+            className="w-full h-auto rounded-lg"
+          />
+        </div>
+
+        {/* Right side - Sign in with Google */}
+        <div className="w-1/2 flex flex-col items-center">
+          <DialogHeader>
+            <h2 className="text-xl font-semibold">Sign in with Google</h2>
+          </DialogHeader>
+          <DialogDescription className="text-center text-gray-500">
+            Continue with your Google account to access your dashboard.
+          </DialogDescription>
+          
+          <Button 
+          onClick={login}
+            className="bg-white text-black mt-8 flex items-center gap-2 border border-gray-300 p-2 rounded-lg hover:cursor-pointer">
+            <FcGoogle size={24} />
+            Sign in with Google
+          </Button>
+        </div>
+      </DialogContent>
+      </Dialog>
     </div>
   );
 }
