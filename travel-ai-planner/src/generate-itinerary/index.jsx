@@ -51,13 +51,16 @@ function GenerateItinerary() {
   //   onError:(error)=>console.log(error)
   // })
   const login = useGoogleLogin({
-    onSuccess: (codeResp) => {
+    onSuccess: async (codeResp) => {
         console.log("Google Login Successful:", codeResp);
-        GetUserProfile(codeResp);
+        await GetUserProfile(codeResp);
     },
-    onError: (error) => console.log("Google Login Error:", error),
-    flow: "implicit",  // Ensure correct OAuth flow
+    onError: (error) => console.error("Google Login Error:", error),
+    flow: "implicit",
   });
+  
+
+
 
 
   const OnGenerateTrip=async()=>{
@@ -86,18 +89,35 @@ function GenerateItinerary() {
   }
 
   const GetUserProfile =(tokenInfo) => {
-    
-      axios.get(`https://www.googleapis.com/oauth/v1/userinfo?access_token=${tokenInfo?.access_token}`, {
+      axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`, {
         headers: {
           Authorization: `Bearer ${tokenInfo?.access_token}`,
           Accept: 'Application/json'
         }
       }).then((resp)=>{
         console.log(resp);
+        localStorage.setItem('user', JSON.stringify(resp.data));
+        setOpenDialog(false);
+        OnGenerateTrip();
       })
     
   };
   
+  // const GetUserProfile = async (tokenInfo) => {
+  //   console.log("Fetching user profile with token:", tokenInfo?.access_token);
+  //   if (!tokenInfo?.access_token) {
+  //       console.error("No access token found");
+  //       return;
+  //   }
+
+  //   try {
+  //       const resp = await axios.get(`https://www.googleapis.com/oauth2/v1/userinfo?access_token=${tokenInfo?.access_token}`);
+  //       console.log("User profile fetched:", resp.data);
+  //   } catch (error) {
+  //       console.error("Error fetching user profile:", error.response?.data || error.message);
+  //   }
+  // };
+
 
   return (
     <div className="sm:px-10 md:px-32 lg:px-56 xl:px-10 px-5 mt-10">
